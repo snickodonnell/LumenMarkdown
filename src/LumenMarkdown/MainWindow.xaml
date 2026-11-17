@@ -7,11 +7,12 @@
         FontFamily="Segoe UI Variable Text, Segoe UI" FontSize="15"
         WindowStyle="None" ResizeMode="CanResize" AllowDrop="True">
   <WindowChrome.WindowChrome>
-    <WindowChrome CaptionHeight="0" ResizeBorderThickness="6" CornerRadius="10" GlassFrameThickness="0" />
+    <WindowChrome CaptionHeight="52" ResizeBorderThickness="6" CornerRadius="10" GlassFrameThickness="0" />
   </WindowChrome.WindowChrome>
 
   <Window.Resources>
     <Style x:Key="HeaderButton" TargetType="Button">
+      <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="True" />
       <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="BorderThickness" Value="0" />
@@ -41,7 +42,8 @@
     <Grid>
       <Grid.RowDefinitions><RowDefinition Height="52" /><RowDefinition Height="*" /><RowDefinition Height="32" /></Grid.RowDefinitions>
 
-      <Grid x:Name="TitleBar" Grid.Row="0" Background="Transparent" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+      <!-- The title bar is a native caption (WindowChrome): Windows handles dragging, drag-to-restore from maximized, Snap, double-click and the system menu. -->
+      <Grid x:Name="TitleBar" Grid.Row="0" Background="Transparent">
         <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
         <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="12,0,0,0" VerticalAlignment="Center">
           <Border Width="28" Height="28" CornerRadius="8" Margin="0,0,10,0">
