@@ -5,7 +5,9 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Runtime.InteropServices;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using LumenMarkdown.Core;
@@ -36,8 +38,41 @@ public partial class MainWindow : Window
         Drop += OnDrop;
         Closing += OnClosing;
         Loaded += OnLoaded;
+        SourceInitialized += (_, _) => HwndSource.FromHwnd(new WindowInteropHelper(this).Handle)?.AddHook(WindowProc);
+        StateChanged += (_, _) => UpdateFrameForState();
         RestoreWindowBounds();
         UpdateWindowState();
+        UpdateFrameForState();
+    }
+
+    private void UpdateFrameForState()
+    {
+        var maximized = WindowState == WindowState.Maximized;
+        WindowFrame.BorderThickness = maximized ? new Thickness(0) : new Thickness(1);
+        WindowFrame.CornerRadius = maximized ? new CornerRadius(0) : new CornerRadius(10);
+        MaximizeButton.Content = maximized ? "❐" : "□";
+        MaximizeButton.ToolTip = maximized ? "Restore" : "Maximize";
+    }
+
+    /// <summary>
+    /// A borderless window maximizes to the full monitor (under the taskbar, with edges cut off).
+    /// Constrain the maximized size to the work area of the monitor the window is on.
+    /// </summary>
+    private static IntPtr WindowProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        const int WM_GETMINMAXINFO = 0x0024;
+        if (msg != WM_GETMINMAXINFO) return IntPtr.Zero;
+        var monitor = NativeMethods.MonitorFromWindow(hwnd, NativeMethods.MONITOR_DEFAULTTONEAREST);
+        if (monitor == IntPtr.Zero) return IntPtr.Zero;
+        var info = new NativeMethods.MONITORINFO { cbSize = Marshal.SizeOf<NativeMethods.MONITORINFO>() };
+        if (!NativeMethods.GetMonitorInfo(monitor, ref info)) return IntPtr.Zero;
+        var minMax = Marshal.PtrToStructure<NativeMethods.MINMAXINFO>(lParam);
+        minMax.ptMaxPosition.X = info.rcWork.Left - info.rcMonitor.Left;
+        minMax.ptMaxPosition.Y = info.rcWork.Top - info.rcMonitor.Top;
+        minMax.ptMaxSize.X = info.rcWork.Right - info.rcWork.Left;
+        minMax.ptMaxSize.Y = info.rcWork.Bottom - info.rcWork.Top;
+        Marshal.StructureToPtr(minMax, lParam, false);
+        return IntPtr.Zero;
     }
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
@@ -365,7 +400,8 @@ public partial class MainWindow : Window
 
     private async void OnPreviewKeyDown(object sender, KeyEventArgs e)
     {
-        if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.A && DocumentTabs.SelectedItem is DocumentTab copyTab)
+        if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.A && Keyboard.FocusedElement is not TextBox &&
+            DocumentTabs.SelectedItem is DocumentTab copyTab)
         {
             e.Handled = true;
             await CopyRawMarkdownAsync(copyTab);

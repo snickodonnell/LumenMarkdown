@@ -6,7 +6,8 @@ A dependency-free, native Windows Markdown reader focused on fast startup and ve
 
 - File-backed, virtualized rendering: only visible lines are decoded and drawn.
 - Light and dark themes (`Ctrl+T`), remembered between launches.
-- Headings, emphasis, inline code, links, quotes, lists, tasks, rules, tables, and fenced code.
+- Headings, emphasis, strikethrough, inline code, links, quotes, nested lists, tasks, rules, tables, and fenced code.
+- Tables with column widths shared across every row, sized to their content, and honoring `:---:` / `---:` alignment.
 - Drag and drop, `Ctrl+O`, `Home`, and `End` keyboard support.
 - Closable tabs with multi-select Open and multi-file drag and drop.
 - Fast in-document search (`Ctrl+F`) with match navigation and visible highlights.

@@ -37,7 +37,7 @@
     </Style>
   </Window.Resources>
 
-  <Border BorderBrush="{DynamicResource SubtleBrush}" BorderThickness="1" CornerRadius="10" Background="{DynamicResource PageBrush}">
+  <Border x:Name="WindowFrame" BorderBrush="{DynamicResource SubtleBrush}" BorderThickness="1" CornerRadius="10" Background="{DynamicResource PageBrush}">
     <Grid>
       <Grid.RowDefinitions><RowDefinition Height="52" /><RowDefinition Height="*" /><RowDefinition Height="32" /></Grid.RowDefinitions>
 
@@ -144,8 +144,8 @@
         <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0,0,7,0" VerticalAlignment="Center">
           <Button x:Name="OutlineButton" Style="{StaticResource HeaderButton}" Click="Outline_Click" ToolTip="Document outline (Ctrl+Shift+O)" FontSize="18" Content="☷" />
           <Button x:Name="ThemeButton" Style="{StaticResource HeaderButton}" Click="Theme_Click" ToolTip="Toggle theme (Ctrl+T)" FontSize="16" Content="☾" />
-          <Button Style="{StaticResource WindowButton}" Click="Minimize_Click" Content="—" />
-          <Button Style="{StaticResource WindowButton}" Click="Maximize_Click" Content="□" />
+          <Button Style="{StaticResource WindowButton}" Click="Minimize_Click" Content="—" ToolTip="Minimize" />
+          <Button x:Name="MaximizeButton" Style="{StaticResource WindowButton}" Click="Maximize_Click" Content="□" ToolTip="Maximize" />
           <Button Style="{StaticResource WindowButton}" Click="Close_Click" Content="×" FontSize="18" />
         </StackPanel>
       </Grid>
@@ -211,8 +211,10 @@
       </Grid>
 
       <Grid Grid.Row="2" Margin="16,0">
-        <TextBlock x:Name="StatusText" Text="Ready" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" VerticalAlignment="Center" />
-        <TextBlock Text="Ctrl+O  Open    Ctrl+A  Copy raw    Ctrl+W  Close    Ctrl+T  Theme" Foreground="{DynamicResource MutedTextBrush}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center" />
+        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+        <TextBlock x:Name="StatusText" Text="Ready" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" VerticalAlignment="Center"
+                   TextTrimming="CharacterEllipsis" Margin="0,0,16,0" />
+        <TextBlock Grid.Column="1" Text="Ctrl+O  Open    Ctrl+A  Copy raw    Ctrl+W  Close    Ctrl+T  Theme" Foreground="{DynamicResource MutedTextBrush}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center" />
       </Grid>
 
       <Border x:Name="FindPanel" Grid.RowSpan="3" Panel.ZIndex="90" Visibility="Collapsed"

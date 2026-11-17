@@ -13,13 +13,26 @@ Check(MarkdownClassifier.Classify("42. item", ref inCode) == MarkdownKind.Number
 Check(MarkdownClassifier.Classify("---", ref inCode) == MarkdownKind.Rule, "rule classification");
 Check(MarkdownClassifier.Classify("```csharp", ref inCode) == MarkdownKind.CodeFence && inCode, "open fence");
 Check(MarkdownClassifier.Classify("# not a heading", ref inCode) == MarkdownKind.Code, "fenced code");
-Check(MarkdownClassifier.Classify("```", ref inCode) == MarkdownKind.CodeFence && !inCode, "close fence");
+Check(MarkdownClassifier.Classify("    indented inside fence", ref inCode) == MarkdownKind.Code, "fenced code keeps indentation kind");
+Check(MarkdownClassifier.Classify("```", ref inCode) == MarkdownKind.CodeFenceEnd && !inCode, "close fence");
+Check(MarkdownClassifier.Classify("    indented code", ref inCode) == MarkdownKind.IndentedCode, "indented code");
+Check(MarkdownClassifier.Classify("\tindented by tab", ref inCode) == MarkdownKind.IndentedCode, "tab-indented code");
+Check(MarkdownClassifier.Classify("    - nested bullet", ref inCode) == MarkdownKind.Bullet, "nested bullet");
+Check(MarkdownClassifier.Classify("    2. nested number", ref inCode) == MarkdownKind.Numbered, "nested numbered");
+Check(MarkdownClassifier.Classify("      ", ref inCode) == MarkdownKind.Blank, "whitespace-only line is blank");
 Check(MarkdownClassifier.Classify("Name | Value", ref inCode) == MarkdownKind.Table, "table without outer pipes");
 Check(MarkdownClassifier.Classify("| :--- | ---: |", ref inCode) == MarkdownKind.TableDelimiter, "table delimiter classification");
 Check(MarkdownTableParser.ParseRow("| one \\| two | `a|b` |").SequenceEqual(["one | two", "`a|b`"]), "table escaped and code pipes");
 Check(MarkdownTableParser.GetAlignments("| :--- | ---: | :---: |").SequenceEqual([
     MarkdownColumnAlignment.Left, MarkdownColumnAlignment.Right, MarkdownColumnAlignment.Center]), "table alignments");
 Check(MarkdownNavigation.HeadingText(new MarkdownLine(MarkdownKind.Heading2, "## Fast reader ##")) == "Fast reader", "heading display text");
+Check(MarkdownNavigation.HeadingText(new MarkdownLine(MarkdownKind.Heading2, "## Learn C#")) == "Learn C#", "heading keeps trailing hash in text");
+Check(MarkdownTableLayout.ToPlainText("**Bold** [link](https://x.y) `code` snake_case \\| ~~old~~") == "Bold link code snake_case | old",
+    "table cell plain text");
+Check(MarkdownTableLayout.ResolveColumnWidths([50, 80], [30, 40], 500).SequenceEqual([50d, 80d]), "compact table keeps natural widths");
+var shared = MarkdownTableLayout.ResolveColumnWidths([100, 900], [60, 100], 500);
+Check(shared.Sum() <= 500 && shared[0] >= 60 && shared[1] > shared[0], "wide table shares available space");
+Check(MarkdownTableLayout.ResolveColumnWidths([400, 400], [300, 300], 500).SequenceEqual([300d, 300d]), "overflowing table keeps minimum widths");
 Check(MarkdownNavigation.HeadingSlug("Fast & Friendly Reader!") == "fast-friendly-reader", "heading anchor slug");
 Check(MarkdownNavigation.HeadingSlug("Café déjà vu") == "café-déjà-vu", "unicode heading anchor slug");
 

@@ -18,7 +18,14 @@ internal static class Settings
     }
     public static SessionState? LoadSession()
     {
-        try { return File.Exists(SessionPath) ? JsonSerializer.Deserialize<SessionState>(File.ReadAllText(SessionPath)) : null; }
+        try
+        {
+            if (!File.Exists(SessionPath)) return null;
+            var state = JsonSerializer.Deserialize<SessionState>(File.ReadAllText(SessionPath));
+            // JSON deserialization drops the case-insensitive comparer that Windows paths need.
+            if (state is not null) state.ScrollOffsets = new Dictionary<string, double>(state.ScrollOffsets ?? new Dictionary<string, double>(), StringComparer.OrdinalIgnoreCase);
+            return state;
+        }
         catch { return null; }
     }
 

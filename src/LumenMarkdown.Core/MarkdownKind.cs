@@ -19,7 +19,9 @@ public enum MarkdownKind : byte
     Code,
     Table,
     TableHeader,
-    TableDelimiter
+    TableDelimiter,
+    CodeFenceEnd,
+    IndentedCode
 }
 
 public readonly record struct MarkdownLine(MarkdownKind Kind, string Text);

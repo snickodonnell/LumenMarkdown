@@ -8,9 +8,13 @@ public static class MarkdownNavigation
     {
         if (line.Kind is not (>= MarkdownKind.Heading1 and <= MarkdownKind.Heading6)) return line.Text;
         var level = (int)line.Kind - (int)MarkdownKind.Heading1 + 1;
-        return line.Text.Length > level && line.Text[level] == ' '
-            ? line.Text[(level + 1)..].Trim().TrimEnd('#').Trim()
-            : line.Text;
+        var text = line.Text.TrimStart();
+        if (text.Length <= level || text[level] != ' ') return text;
+        text = text[(level + 1)..].Trim();
+        // An optional closing sequence of '#' only counts when separated by a space ("## C#" keeps its '#').
+        var closing = text.TrimEnd('#');
+        if (closing.Length == 0) return string.Empty;
+        return closing.Length < text.Length && closing[^1] == ' ' ? closing.TrimEnd() : text;
     }
 
     public static string HeadingSlug(string text)

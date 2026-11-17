@@ -19,6 +19,8 @@ internal sealed class DocumentTab : INotifyPropertyChanged, IDisposable
     private int[] _searchMatches = [];
     private int _currentSearchMatch = -1;
     private HeadingItem[]? _headings;
+    private TableLayoutCache? _tableLayouts;
+    private double _viewportWidth;
 
     public DocumentTab(string path)
     {
@@ -45,6 +47,21 @@ internal sealed class DocumentTab : INotifyPropertyChanged, IDisposable
     public IReadOnlyList<int> SearchMatches => _searchMatches;
     public int CurrentSearchMatch => _currentSearchMatch;
     public double ScrollOffset { get; set; }
+
+    /// <summary>Width of the visible document area, used to wrap text and size tables consistently across rows.</summary>
+    public double ViewportWidth
+    {
+        get => _viewportWidth;
+        set
+        {
+            if (Math.Abs(_viewportWidth - value) < 0.5) return;
+            _viewportWidth = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public TableLayout? GetTableLayout(int lineIndex) => _tableLayouts?.Get(lineIndex);
+
     public event PropertyChangedEventHandler? PropertyChanged;
     public event EventHandler? ExternalChanged;
     public event Action<DocumentTab, string>? LinkRequested;
@@ -53,8 +70,9 @@ internal sealed class DocumentTab : INotifyPropertyChanged, IDisposable
     {
         _source?.Dispose();
         _source = source;
-        Lines = new MarkdownLineList(this, source);
+        _tableLayouts = new TableLayoutCache(source);
         _headings = null;
+        Lines = new MarkdownLineList(this, source);
         _searchMatches = [];
         _currentSearchMatch = -1;
         IsLoading = false;
@@ -100,7 +118,6 @@ internal sealed class DocumentTab : INotifyPropertyChanged, IDisposable
         _currentSearchMatch = matches.Length > 0 ? 0 : -1;
         OnPropertyChanged(nameof(SearchMatches));
         OnPropertyChanged(nameof(CurrentSearchMatch));
-        OnPropertyChanged(nameof(SearchQuery));
     }
 
     public int MoveSearch(bool previous)

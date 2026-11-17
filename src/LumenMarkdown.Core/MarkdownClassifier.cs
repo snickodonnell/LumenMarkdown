@@ -13,21 +13,34 @@ public static class MarkdownClassifier
     internal static MarkdownKind Classify(ReadOnlySpan<byte> line, ref bool inCodeFence)
     {
         var start = 0;
+        var columns = 0;
         while (start < line.Length && (line[start] == (byte)' ' || line[start] == (byte)'\t'))
+        {
+            columns += line[start] == (byte)'\t' ? 4 - columns % 4 : 1;
             start++;
+        }
 
         var trimmed = line[start..];
         if (IsFence(trimmed))
         {
             inCodeFence = !inCodeFence;
-            return MarkdownKind.CodeFence;
+            return inCodeFence ? MarkdownKind.CodeFence : MarkdownKind.CodeFenceEnd;
         }
 
-        if (inCodeFence || start >= 4)
+        if (inCodeFence)
             return MarkdownKind.Code;
 
-        if (trimmed.IsEmpty || (trimmed.Length == 1 && trimmed[0] == (byte)'\r'))
+        if (IsBlank(trimmed))
             return MarkdownKind.Blank;
+
+        if (columns >= 4)
+        {
+            // Deeply indented list markers are nested list items rather than indented code.
+            if (IsTask(trimmed)) return MarkdownKind.Task;
+            if (trimmed.Length >= 2 && IsBulletMarker(trimmed[0]) && trimmed[1] == (byte)' ') return MarkdownKind.Bullet;
+            if (IsNumbered(trimmed)) return MarkdownKind.Numbered;
+            return MarkdownKind.IndentedCode;
+        }
 
         var heading = 0;
         while (heading < trimmed.Length && heading < 6 && trimmed[heading] == (byte)'#')
@@ -57,6 +70,9 @@ public static class MarkdownClassifier
 
         return MarkdownKind.Paragraph;
     }
+
+    private static bool IsBlank(ReadOnlySpan<byte> line) =>
+        line.IsEmpty || (line.Length == 1 && line[0] == (byte)'\r');
 
     private static bool IsFence(ReadOnlySpan<byte> line) =>
         line.Length >= 3 &&
