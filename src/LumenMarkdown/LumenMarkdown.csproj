@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>LumenMarkdown</AssemblyName>
+    <RootNamespace>LumenMarkdown</RootNamespace>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <Version>1.3.1</Version>
+    <AssemblyVersion>1.3.1.0</AssemblyVersion>
+    <FileVersion>1.3.1.0</FileVersion>
+    <ApplicationIcon>Assets\LumenMarkdown.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../LumenMarkdown.Core/LumenMarkdown.Core.csproj" />
+    <Resource Include="Assets\LumenMarkdown-128.png" />
+    <None Include="Assets\LumenMarkdown.ico" />
+    <None Include="Assets\LumenMarkdown.png" />
+  </ItemGroup>
+</Project>

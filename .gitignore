@@ -1,0 +1,8 @@
+**/bin/
+**/obj/
+.vs/
+*.user
+dist/
+installer-output/
+.tmp/
+*.log

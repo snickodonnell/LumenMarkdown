@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="src/LumenMarkdown.Core/LumenMarkdown.Core.csproj" />
+  <Project Path="src/LumenMarkdown/LumenMarkdown.csproj" />
+  <Project Path="tests/LumenMarkdown.Tests/LumenMarkdown.Tests.csproj" />
+</Solution>
